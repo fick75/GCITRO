@@ -89,7 +89,13 @@ function selectTramite(tipo) {
 function renderForm(formConfig) {
     const formTitle = document.getElementById('form-title');
     const formSubtitle = document.getElementById('form-subtitle');
-    const formFields = document.getElementById('form-fields');
+    const formFields = document.getElementById('dynamic-form'); // ✅ CORREGIDO: ID correcto
+
+    if (!formTitle || !formSubtitle || !formFields) {
+        console.error('Error: Elementos del formulario no encontrados');
+        showNotification('Error al cargar el formulario', 'error');
+        return;
+    }
 
     formTitle.textContent = formConfig.title;
     formSubtitle.textContent = formConfig.subtitle;
@@ -152,6 +158,18 @@ function createFieldHTML(field) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENVÍO DE FORMULARIO
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Función llamada desde HTML (mantener compatibilidad)
+async function enviarSolicitud() {
+    const form = document.getElementById('solicitud-form');
+    if (form) {
+        const event = { 
+            preventDefault: () => {},
+            target: form
+        };
+        await submitForm(event);
+    }
+}
 
 async function submitForm(event) {
     event.preventDefault();
@@ -381,12 +399,10 @@ async function cambiarEstado(folio, nuevoEstado) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('tramite-form');
-    if (form) {
-        form.addEventListener('submit', submitForm);
-    }
-
+    // El formulario usa onsubmit inline en HTML, no necesita listener aquí
+    
     if (CONFIG.options.debug) {
         console.log('✅ app-google.js cargado');
+        console.log('📋 Funciones disponibles: goToHome, showSection, selectTramite, submitForm');
     }
 });
