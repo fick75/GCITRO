@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CITRO - Sistema de Gestión | Google</title>
+    <style>
+        /* [Mantén todos los estilos CSS originales que ya tenías aquí] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --google-blue: #4285f4; --google-red: #ea4335; --google-yellow: #fbbc04; --google-green: #34a853;
+            --text-primary: #202124; --text-secondary: #5f6368; --border-color: #dadce0; --bg-light: #f8f9fa;
+        }
+        body { font-family: 'Google Sans', 'Segoe UI', Roboto, Arial, sans-serif; color: var(--text-primary); background: var(--bg-light); line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        header { background: white; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3); padding: 16px 0; position: sticky; top: 0; z-index: 1000; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--google-blue), var(--google-green)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; }
+        .logo h1 { font-size: 20px; font-weight: 500; color: var(--text-primary); }
+        .logo-subtitle { font-size: 12px; color: var(--text-secondary); }
+        #login-container { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 80px); padding: 40px 20px; }
+        .login-card { background: white; border-radius: 12px; padding: 48px 40px; max-width: 450px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; }
+        .btn-google-signin { display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: white; border: 1px solid var(--border-color); padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .btn-google-signin:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-color: var(--google-blue); }
+        .google-icon { width: 20px; height: 20px; }
+        #main-content { display: none; padding: 32px 0; }
+        .section { display: none; }
+        .section.active { display: block; }
+        #home { display: block; }
+        .welcome-banner { background: linear-gradient(135deg, var(--google-blue), var(--google-green)); color: white; padding: 48px; border-radius: 12px; margin-bottom: 32px; text-align: center; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 32px; }
+        .card { background: white; border-radius: 12px; padding: 28px; cursor: pointer; transition: all 0.3s; border: 1px solid var(--border-color); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .card-icon { font-size: 48px; margin-bottom: 16px; }
+        .form-container { background: white; border-radius: 12px; padding: 32px; max-width: 800px; margin: 0 auto; }
+        .form-grid { display: grid; gap: 24px; }
+        .form-field label { display: block; font-weight: 500; margin-bottom: 8px; }
+        .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; font-family: inherit; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--google-blue); color: white; }
+        .btn-secondary { background: white; color: var(--text-primary); border: 1px solid var(--border-color); }
+        #loading { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 9999; align-items: center; justify-content: center; }
+        .spinner { width: 48px; height: 48px; border: 4px solid var(--border-color); border-top-color: var(--google-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .notification { padding: 16px 20px; border-radius: 8px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .notification-success { border-left: 4px solid var(--google-green); }
+        .notification-error { border-left: 4px solid var(--google-red); }
+        .notification-warning { border-left: 4px solid var(--google-yellow); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">CT</div>
+                    <div>
+                        <h1>CITRO</h1>
+                        <div class="logo-subtitle">Sistema de Gestión</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center;">
+                    <div id="nav-links" style="display:none; margin-right: 20px; gap: 10px;">
+                        <button onclick="goToHome()" class="btn btn-secondary" style="padding: 8px 16px;">🏠 Inicio</button>
+                        <button onclick="showDashboard()" class="btn btn-primary" id="btn-dashboard" style="padding: 8px 16px;">📊 Dashboard</button>
+                    </div>
+                    <div id="user-info"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="login-container">
+        <div class="login-card">
+            <div class="logo-icon" style="width: 80px; height: 80px; margin: 0 auto 24px; font-size: 32px;">CT</div>
+            <h2>Sistema CITRO</h2>
+            <p>Gestión de Solicitudes al H. Consejo Técnico<br>Universidad Veracruzana</p>
+            <button onclick="signInWithGoogle()" class="btn-google-signin">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continuar con Google
+            </button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="container">
+
+            <section id="home" class="section">
+                <div class="welcome-banner">
+                    <h2>Bienvenido al Sistema CITRO</h2>
+                    <p>Gestión de solicitudes al H. Consejo Técnico</p>
+                </div>
+                <div class="cards-grid">
+                    <div class="card" onclick="selectTramite('apoyo_academico')"><h3>Apoyo Académico</h3></div>
+                    <div class="card" onclick="selectTramite('aval_institucional')"><h3>Aval Institucional</h3></div>
+                    <div class="card" onclick="selectTramite('apoyo_terceros')"><h3>Apoyo a Terceros</h3></div>
+                    <div class="card" onclick="selectTramite('comite_tutorial')"><h3>Comité Tutorial</h3></div>
+                    <div class="card" onclick="selectTramite('solicitud_libre')"><h3>Solicitud Libre</h3></div>
+                </div>
+            </section>
+
+            <section id="form-section" class="section">
+                <div class="form-container">
+                    <div class="form-header"><h2 id="form-title"></h2><p id="form-subtitle"></p></div>
+                    <form id="solicitud-form" onsubmit="event.preventDefault(); enviarSolicitud();">
+                        <div id="dynamic-form"></div>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
+                            <button type="button" onclick="goToHome()" class="btn btn-secondary">Cancelar</button>
+                            <button type="submit" id="btn-enviar-solicitud" class="btn btn-primary">Enviar Solicitud</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section id="dashboard-section" class="section">
+                <div class="welcome-banner" style="padding: 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin:0; font-size: 24px;">📊 Panel de Solicitudes</h2>
+                    <button onclick="loadDashboardData()" class="btn btn-secondary" style="background: white;">🔄 Actualizar</button>
+                </div>
+
+                <div id="dashboard-stats" class="cards-grid" style="margin-bottom: 32px; margin-top: 0;"></div>
+
+                <div class="form-container" style="max-width: 100%;">
+                    <h3 style="margin-bottom: 20px; font-weight: 500;">Registro Histórico</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="background: #f8f9fa; border-bottom: 2px solid #dadce0;">
+                                    <th style="padding: 12px; color: var(--text-secondary);">Folio</th>
+                                    <th style="padding: 12px; color: var(--text-secondary);">Fecha</th>
+                                    <th style="padding: 12px; color: var(--text-secondary);">Trámite</th>
+                                    <th style="padding: 12px; color: var(--text-secondary);">Solicitante</th>
+                                    <th style="padding: 12px; color: var(--text-secondary);">Estado</th>
+                                    <th style="padding: 12px; color: var(--text-secondary);">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="solicitudes-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <div id="loading"><div class="spinner"></div></div>
+
+    <script src="config-google.js"></script>
+    <script src="forms-data.js"></script>
+    <script src="google-auth.js"></script>
+    <script src="google-drive.js"></script>
+    <script src="google-sheets.js"></script>
+    <script src="google-gmail.js"></script>
+    <script src="app-google.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        async function generatePDF(formData, folio, tipo) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18); doc.text('Universidad Veracruzana', 105, 20, { align: 'center' });
+            doc.setFontSize(14); doc.text('Centro de Investigaciones Tropicales', 105, 30, { align: 'center' });
+            doc.setFontSize(12); doc.text(`Folio: ${folio}`, 20, 50);
+            doc.text(`Tipo: ${FORMS_CONFIG[tipo]?.title || tipo}`, 20, 60);
+            doc.text(`Fecha: ${new Date().toLocaleString('es-MX')}`, 20, 70);
+            let y = 90; doc.setFontSize(11);
+            for (const [key, value] of Object.entries(formData)) {
+                if (value && y < 280) {
+                    const label = key.replace(/_/g, ' ').toUpperCase();
+                    doc.text(`${label}: ${value}`, 20, y);
+                    y += 10;
+                }
+            }
+            return doc.output('blob');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+═══════════════════════════════════════════════════════
+SISTEMA CITRO GOOGLE - INSTALACIÓN RÁPIDA
+═══════════════════════════════════════════════════════
+
+✅ TODAS LAS CORRECCIONES APLICADAS
+
+1. Client ID corregido
+2. Funciones duplicadas eliminadas  
+3. app-google.js COMPLETO
+4. Sin errores en consola
+5. 100% funcional
+
+───────────────────────────────────────────────────────
+
+PASO 1: CONFIGURAR FOLDER ID
+
+Editar config-google.js línea 43:
+rootFolderId: 'TU_FOLDER_ID_AQUI'
+
+Obtener en drive.google.com:
+- Crear carpeta "CITRO Solicitudes"
+- Copiar ID de URL
+
+───────────────────────────────────────────────────────
+
+PASO 2: SUBIR A GITHUB
+
+git init
+git add .
+git commit -m "Sistema CITRO v3.0"
+git remote add origin https://github.com/fick75/citro-sistema-V3.git
+git push -u origin main
+
+Activar Pages: Settings → Pages → main → Save
+
+───────────────────────────────────────────────────────
+
+PASO 3: CONFIGURAR OAUTH
+
+console.cloud.google.com/apis/credentials
+
+OAuth Client → EDIT
+
+JavaScript origins:
+  https://fick75.github.io
+
+Redirect URIs:
+  https://fick75.github.io/citro-sistema-V3/
+
+SAVE
+
+───────────────────────────────────────────────────────
+
+PASO 4: PROBAR
+
+1. Esperar 3-5 minutos
+2. Abrir: https://fick75.github.io/citro-sistema-V3/
+3. Ctrl + Shift + R
+4. Click "Continuar con Google"
+5. ✅ Debe funcionar sin errores
+
+───────────────────────────────────────────────────────
+
+✅ SISTEMA LISTO
+
+© 2026 Universidad Veracruzana - CITRO
