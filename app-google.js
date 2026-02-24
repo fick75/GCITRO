@@ -1,7 +1,8 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- * CITRO — Aplicación Principal
- * Lógica de negocio y manejo de UI
+ * CITRO — Aplicación Principal - VERSIÓN DEFINITIVA
+ * Todas las funciones necesarias incluidas
+ * Universidad Veracruzana
  * ═══════════════════════════════════════════════════════════════
  */
 
@@ -29,7 +30,7 @@ function showSection(sectionId) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// NOTIFICACIONES
+// NOTIFICACIONES Y UI
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 function showNotification(message, type = 'info') {
@@ -65,7 +66,7 @@ function showLoading(show) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SELECCIÓN DE TRÁMITE
+// SELECCIÓN Y RENDERIZADO DE FORMULARIOS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 function selectTramite(tipo) {
@@ -89,7 +90,7 @@ function selectTramite(tipo) {
 function renderForm(formConfig) {
     const formTitle = document.getElementById('form-title');
     const formSubtitle = document.getElementById('form-subtitle');
-    const formFields = document.getElementById('dynamic-form'); // ✅ CORREGIDO: ID correcto
+    const formFields = document.getElementById('dynamic-form');
 
     if (!formTitle || !formSubtitle || !formFields) {
         console.error('Error: Elementos del formulario no encontrados');
@@ -159,7 +160,6 @@ function createFieldHTML(field) {
 // ENVÍO DE FORMULARIO
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// Función llamada desde HTML (mantener compatibilidad)
 async function enviarSolicitud() {
     const form = document.getElementById('solicitud-form');
     if (form) {
@@ -179,6 +179,11 @@ async function submitForm(event) {
         return;
     }
 
+    if (!currentFormType) {
+        showNotification('No se ha seleccionado ningún formulario', 'error');
+        return;
+    }
+
     showLoading(true);
 
     try {
@@ -190,6 +195,10 @@ async function submitForm(event) {
         });
 
         const formConfig = FORMS_CONFIG[currentFormType];
+        if (!formConfig) {
+            throw new Error('Configuración de formulario no encontrada');
+        }
+
         const validation = validateFormData(currentFormType, data);
 
         if (!validation.valid) {
@@ -200,15 +209,17 @@ async function submitForm(event) {
 
         const folio = generateFolio(currentFormType);
         
+        showNotification('Generando PDF...', 'info');
         const pdfBlob = await generatePDF(currentFormType, data, folio);
         
+        showNotification('Subiendo a Drive...', 'info');
         const pdfUrl = await uploadPDFToDrive(pdfBlob, folio, currentFormType);
 
         const solicitud = {
             folio: folio,
             fecha: new Date().toISOString(),
             tipo: currentFormType,
-            nombre: data.nombre_completo || data.nombre_estudiante || data.nombre_solicitante,
+            nombre: data.nombre_completo || data.nombre_estudiante || data.nombre_solicitante || 'Sin nombre',
             email: userState.profile.email,
             matricula: data.matricula || '',
             monto: data.monto_total || data.monto_solicitado || 0,
@@ -218,13 +229,16 @@ async function submitForm(event) {
             usuarioGoogle: userState.profile.email
         };
 
+        showNotification('Guardando solicitud...', 'info');
         await saveSolicitudToSheet(solicitud);
 
+        showNotification('Enviando email...', 'info');
         await sendConfirmationEmail(solicitud, data);
 
         showNotification('¡Solicitud enviada exitosamente! Recibirás una confirmación por correo.', 'success');
         
         event.target.reset();
+        currentFormType = null;
         
         setTimeout(() => {
             goToHome();
@@ -240,6 +254,10 @@ async function submitForm(event) {
 
 function validateFormData(tipo, data) {
     const formConfig = FORMS_CONFIG[tipo];
+    if (!formConfig) {
+        return { valid: false, errors: ['Configuración de formulario no encontrada'] };
+    }
+
     const errors = [];
 
     formConfig.fields.forEach(field => {
@@ -399,10 +417,22 @@ async function cambiarEstado(folio, nuevoEstado) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 document.addEventListener('DOMContentLoaded', () => {
-    // El formulario usa onsubmit inline en HTML, no necesita listener aquí
-    
     if (CONFIG.options.debug) {
         console.log('✅ app-google.js cargado');
-        console.log('📋 Funciones disponibles: goToHome, showSection, selectTramite, submitForm');
+        console.log('📋 Funciones disponibles:', {
+            goToHome: typeof goToHome,
+            showSection: typeof showSection,
+            showNotification: typeof showNotification,
+            showLoading: typeof showLoading,
+            selectTramite: typeof selectTramite,
+            submitForm: typeof submitForm,
+            enviarSolicitud: typeof enviarSolicitud,
+            showDashboard: typeof showDashboard
+        });
     }
 });
+
+// Log de carga
+if (typeof console !== 'undefined') {
+    console.log('📦 app-google.js loaded successfully');
+}
